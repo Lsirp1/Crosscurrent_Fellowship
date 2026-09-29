@@ -165,9 +165,11 @@ input:focus, textarea:focus, select:focus {
 .people-checkboxes.list-format {
   display: flex;
   flex-direction: column;
+  flex-wrap: nowrap;
   gap: 2px;
   max-height: 190px;
   overflow-y: auto;
+  overflow-x: hidden;
   border: 1px solid var(--hairline);
   border-radius: 6px;
   padding: 6px;
@@ -177,6 +179,7 @@ input:focus, textarea:focus, select:focus {
 .people-checkboxes.list-format .person-check {
   display: flex;
   width: 100%;
+  flex-shrink: 0;
   border: none;
   border-radius: 4px;
   background: transparent;
