@@ -166,7 +166,7 @@ input:focus, textarea:focus, select:focus {
   display: flex;
   flex-direction: column;
   flex-wrap: nowrap;
-  gap: 2px;
+  gap: 0;
   max-height: 190px;
   overflow-y: auto;
   overflow-x: hidden;
@@ -174,6 +174,39 @@ input:focus, textarea:focus, select:focus {
   border-radius: 6px;
   padding: 6px;
   background: var(--ink-2);
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) var(--ink-2);
+}
+
+.people-checkboxes.list-format::-webkit-scrollbar {
+  width: 8px;
+}
+.people-checkboxes.list-format::-webkit-scrollbar-track {
+  background: var(--ink-2);
+  border-radius: 6px;
+}
+.people-checkboxes.list-format::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 6px;
+}
+.people-checkboxes.list-format::-webkit-scrollbar-thumb:hover {
+  background: var(--gold);
+}
+
+.date-edit-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  color: var(--parchment-dim);
+  margin-bottom: 8px;
+}
+
+.date-edit-row input[type="date"] {
+  width: auto;
+  font-size: 0.82rem;
+  padding: 6px 10px;
+  color-scheme: dark;
 }
 
 .people-checkboxes.list-format .person-check {
@@ -181,9 +214,14 @@ input:focus, textarea:focus, select:focus {
   width: 100%;
   flex-shrink: 0;
   border: none;
-  border-radius: 4px;
+  border-bottom: 1px solid rgba(217, 165, 102, 0.18);
+  border-radius: 0;
   background: transparent;
-  padding: 7px 8px;
+  padding: 5px 8px;
+}
+
+.people-checkboxes.list-format .person-check:last-child {
+  border-bottom: none;
 }
 
 .people-checkboxes.list-format .person-check:hover {
@@ -637,6 +675,19 @@ function formatDate(iso) {
   return d.toLocaleDateString(undefined, opts);
 }
 
+function toDateInputValue(iso) {
+  const d = new Date(iso);
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function fromDateInputValue(value) {
+  // noon avoids the date shifting a day due to timezone conversion
+  return new Date(value + 'T12:00:00').toISOString();
+}
+
 function findOrCreatePerson(name) {
   const trimmed = name.trim();
   const existing = state.people.find(p => p.name.toLowerCase() === trimmed.toLowerCase());
@@ -764,6 +815,7 @@ function saveEdit(id) {
   const textEl = document.getElementById('edit-text-' + id);
   const peopleContainer = document.getElementById('edit-people-' + id);
   const urgentEl = document.getElementById('edit-urgent-' + id);
+  const dateEl = document.getElementById('edit-date-' + id);
   const text = textEl.value.trim();
   const personIds = Array.from(peopleContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
 
@@ -776,6 +828,11 @@ function saveEdit(id) {
   entry.request = text;
   entry.personIds = personIds;
   entry.urgent = !!(urgentEl && urgentEl.checked);
+  if (dateEl && dateEl.value) {
+    const newIso = fromDateInputValue(dateEl.value);
+    if (entry.answered) entry.dateAnswered = newIso;
+    else entry.dateAdded = newIso;
+  }
   editingId = null;
   statusMsg = '';
   saveState();
@@ -882,6 +939,8 @@ function requestLineHtml(entry, isDisplay, currentPersonId) {
 }
 
 function editFormHtml(entry) {
+  const dateIso = entry.answered ? entry.dateAnswered : entry.dateAdded;
+  const dateLabel = entry.answered ? 'Date answered' : 'Date added';
   return `
     <div class="request-line editing-line">
       <div class="people-picker-label">Who is this for?</div>
@@ -890,6 +949,10 @@ function editFormHtml(entry) {
         <div class="people-checkboxes list-format" id="edit-people-${entry.id}">${renderPeopleCheckboxesHtml(entry.personIds || [])}</div>
       </div>
       <textarea class="edit-textarea" id="edit-text-${entry.id}" rows="2">${escapeHtml(entry.request)}</textarea>
+      <label class="date-edit-row">
+        <span>${dateLabel}</span>
+        <input type="date" id="edit-date-${entry.id}" value="${toDateInputValue(dateIso)}">
+      </label>
       <label class="urgent-checkbox-row">
         <input type="checkbox" id="edit-urgent-${entry.id}" ${entry.urgent ? 'checked' : ''}>
         Mark as urgent
