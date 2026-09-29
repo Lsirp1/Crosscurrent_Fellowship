@@ -1,1 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sharing Time — Prayer Requests</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600&display=swap');
 
+:root{
+  --ink: #121a30;
+  --ink-2: #1c2846;
+  --parchment: #f3eee1;
+  --parchment-dim: #b9c0d6;
+  --gold: #d9a566;
+  --sage: #8fb08b;
+  --urgent: #d1594a;
+  --hairline: rgba(243,238,225,0.14);
+}
+
+*{ box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: 'Inter', sans-serif;
+  min-height: 100%;
+}
+
+.app {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 20px 80px;
+}
+
+.app.display-mode {
+  max-width: 900px;
+  padding: 48px 32px 80px;
+}
+
+header.top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+h1 {
+  font-family: 'Fraunces', serif;
+  font-weight: 500;
+  font-size: 2rem;
+  margin: 0;
+  letter-spacing: 0.2px;
+}
+
+.subtitle {
+  font-size: 0.95rem;
+  color: var(--parchment-dim);
+  margin: 4px 0 28px;
+}
+
+.mode-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.mode-toggle button {
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--parchment-dim);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.mode-toggle button.active {
+  border-color: var(--gold);
+  color: var(--parchment);
+}
+
+.mode-toggle button:hover { color: var(--parchment); }
+
+/* --- Add form --- */
+.add-form {
+  background: var(--ink-2);
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 36px;
+}
+
+.add-form .row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.add-form label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--parchment-dim);
+  margin-bottom: 6px;
+}
+
+.field { flex: 1; min-width: 200px; }
+
+input, textarea, select {
+  width: 100%;
+  background: var(--ink);
+  border: 1px solid var(--hairline);
+  color: var(--parchment);
+  padding: 10px 12px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  resize: vertical;
+}
+
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8'%3E%3Cpath fill='%23b9c0d6' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 32px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--gold);
+}
+
+.request-input-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px;
+  background: var(--ink);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.request-input-row textarea {
+  flex: 1;
+}
+
+.people-picker-label {
+  font-size: 0.72rem;
+  color: var(--parchment-dim);
+  margin-bottom: 2px;
+}
+
+.people-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  margin-bottom: 6px;
+}
+
+.person-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: var(--parchment-dim);
+  cursor: pointer;
+  background: var(--ink-2);
+  border: 1px solid var(--hairline);
+  border-radius: 14px;
+  padding: 4px 10px 4px 8px;
+}
+
+.person-check input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--gold);
+  cursor: pointer;
+}
+
+.person-check.checked {
+  color: var(--parchment);
+  border-color: var(--gold);
+}
+
+.quick-add-person {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.quick-add-person input {
+  font-size: 0.85rem;
+  padding: 6px 10px;
+}
+
+.quick-add-person button {
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--gold);
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.quick-add-person button:hover { border-color: var(--gold); }
+
+.remove-request-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--parchment-dim);
+  width: 26px;
+  height: 26px;
+  min-width: 26px;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.remove-request-btn:hover { border-color: #c17a6b; color: #c17a6b; }
+
+.editing-line {
+  background: var(--ink-2);
+  border-radius: 8px;
+  padding: 12px;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.edit-textarea {
+  width: 100%;
+  margin: 6px 0 10px;
+}
+
+.edit-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.edit-actions .save-btn {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.edit-actions .save-btn:hover { filter: brightness(1.08); }
+
+.edit-actions .cancel-btn {
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--parchment-dim);
+  padding: 7px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.edit-actions .cancel-btn:hover { color: var(--parchment); }
+
+.request-actions button.edit-btn:hover { border-color: var(--gold); color: var(--gold); }
+
+.shared-with {
+  font-size: 0.78rem;
+  color: var(--parchment-dim);
+  font-style: italic;
+  margin-top: 2px;
+}
+
+.urgent-badge {
+  display: inline-block;
+  background: var(--urgent);
+  color: #fff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 10px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.request-line.urgent {
+  background: rgba(209, 89, 74, 0.1);
+  border-left: 3px solid var(--urgent);
+  padding-left: 12px;
+  border-radius: 4px;
+}
+
+.display-mode .urgent-badge { font-size: 0.8rem; padding: 3px 10px; }
+
+.urgent-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  color: var(--parchment-dim);
+  margin-bottom: 8px;
+}
+
+.urgent-checkbox-row input[type="checkbox"] {
+  width: auto;
+  accent-color: var(--urgent);
+  cursor: pointer;
+}
+
+/* --- People manager --- */
+.people-toggle {
+  background: transparent;
+  border: none;
+  color: var(--parchment-dim);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0;
+  margin-bottom: 24px;
+}
+.people-toggle:hover { color: var(--parchment); }
+
+.people-manager-list { margin-bottom: 12px; }
+
+.person-manage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.person-manage-row:last-child { border-bottom: none; }
+
+.person-manage-name {
+  font-family: 'Fraunces', serif;
+  font-size: 1rem;
+}
+
+.person-manage-row.editing {
+  flex-wrap: wrap;
+}
+
+.person-manage-row.editing input[type="text"] {
+  flex: 1;
+  min-width: 160px;
+}
+
+.person-manage-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.person-manage-actions button {
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--parchment-dim);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+.person-manage-actions button.edit-btn:hover { border-color: var(--gold); color: var(--gold); }
+.person-manage-actions button.delete-btn:hover { border-color: var(--urgent); color: var(--urgent); }
+.person-manage-actions button.save-btn { background: var(--gold); color: var(--ink); border: none; font-weight: 600; }
+.person-manage-actions button.save-btn:hover { filter: brightness(1.08); }
+.person-manage-actions button.cancel-btn:hover { color: var(--parchment); }
+
+.add-request-line {
+  background: transparent;
+  border: none;
+  color: var(--gold);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 0 16px;
+}
+
+.add-request-line:hover { text-decoration: underline; }
+
+.add-form button.submit {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  padding: 10px 22px;
+  border-radius: 6px;
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  margin-top: 4px;
+}
+
+.add-form button.submit:hover { filter: brightness(1.08); }
+.add-form button.submit:disabled { opacity: 0.5; cursor: not-allowed; }
+
+/* --- Section headers --- */
+.section-title {
+  font-family: 'Fraunces', serif;
+  font-size: 1.15rem;
+  font-weight: 500;
+  margin: 36px 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.section-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--parchment-dim);
+  font-weight: 400;
+}
+
+.section-rule {
+  height: 1px;
+  background: var(--hairline);
+  margin-bottom: 6px;
+}
+
+/* --- Person groups --- */
+.person-group {
+  padding: 18px 0;
+  border-bottom: 1px solid var(--hairline);
+}
+.person-group:last-child { border-bottom: none; }
+
+.person-name {
+  font-family: 'Fraunces', serif;
+  font-size: 1.1rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.person-name .flame {
+  font-size: 0.95rem;
+}
+
+.request-line {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 8px 0 8px 26px;
+}
+
+.request-line + .request-line {
+  border-top: 1px dashed var(--hairline);
+}
+
+.request-date {
+  font-size: 0.78rem;
+  color: var(--parchment-dim);
+  flex-shrink: 0;
+  width: 56px;
+  padding-top: 2px;
+}
+
+.request-text {
+  flex: 1;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--parchment);
+  word-wrap: break-word;
+}
+
+.request-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+  align-self: center;
+}
+
+.request-actions button {
+  background: transparent;
+  border: 1px solid var(--hairline);
+  color: var(--parchment-dim);
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
+}
+
+.request-actions button.answer-btn:hover { border-color: var(--sage); color: var(--sage); }
+.request-actions button.undo-btn:hover { border-color: var(--gold); color: var(--gold); }
+.request-actions button.delete-btn:hover { border-color: #c17a6b; color: #c17a6b; }
+
+.empty-note {
+  color: var(--parchment-dim);
+  font-size: 0.9rem;
+  padding: 20px 0;
+  font-style: italic;
+}
+
+/* --- Display mode --- */
+.display-mode .person-name { font-size: 1.4rem; }
+.display-mode .request-text { font-size: 1.1rem; }
+.display-mode .request-date { font-size: 0.85rem; width: 66px; }
+.display-mode .section-title { font-size: 1.4rem; }
+.display-mode h1 { font-size: 2.6rem; }
+.display-mode .person-group { padding: 22px 0; }
+
+.exit-display {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: var(--ink-2);
+  border: 1px solid var(--hairline);
+  color: var(--parchment-dim);
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+}
+.exit-display:hover { opacity: 1; }
+
+.status-line {
+  font-size: 0.75rem;
+  color: var(--parchment-dim);
+  margin-top: -20px;
+  margin-bottom: 24px;
+  min-height: 16px;
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 1.6rem; }
+  .request-line { flex-wrap: wrap; padding-left: 0; }
+  .request-date { width: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="app" id="app">
+  <div id="content">Loading…</div>
+</div>
+
+<script>
+let state = { people: [], requests: [] };
+let mode = 'manage'; // 'manage' | 'display'
+let editingId = null; // id of the request currently open for editing, if any
+let editingPersonId = null; // id of the person currently being renamed, if any
+let showPeopleManager = false;
+let pollTimer = null;
+let statusMsg = '';
+
+function uid(prefix) {
+  return prefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function formatDate(iso) {
+  const d = new Date(iso);
+  const now = new Date();
+  const opts = d.getFullYear() === now.getFullYear()
+    ? { month: 'short', day: 'numeric' }
+    : { month: 'short', day: 'numeric', year: 'numeric' };
+  return d.toLocaleDateString(undefined, opts);
+}
+
+function findOrCreatePerson(name) {
+  const trimmed = name.trim();
+  const existing = state.people.find(p => p.name.toLowerCase() === trimmed.toLowerCase());
+  if (existing) return existing.id;
+  const person = { id: uid('person'), name: trimmed };
+  state.people.push(person);
+  return person.id;
+}
+
+function personName(personId) {
+  const p = state.people.find(p => p.id === personId);
+  return p ? p.name : 'Unknown';
+}
+
+async function loadState() {
+  try {
+    const res = await fetch('/api/data');
+    if (res.ok) {
+      const parsed = await res.json();
+      state = { people: parsed.people || [], requests: parsed.requests || [] };
+      // migrate older single-person requests to the personIds array format, just in case
+      state.requests.forEach(r => {
+        if (!r.personIds) r.personIds = r.personId ? [r.personId] : [];
+        delete r.personId;
+      });
+    }
+  } catch (e) {
+    statusMsg = 'Could not reach the server — try refreshing the page.';
+  }
+  render();
+}
+
+async function saveState() {
+  try {
+    const res = await fetch('/api/data', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(state)
+    });
+    if (!res.ok) throw new Error('save failed');
+  } catch (e) {
+    statusMsg = 'Could not save — changes may not persist.';
+    render();
+  }
+}
+
+function addRequestsBatch(entries) {
+  const now = new Date();
+  entries.forEach((entry, i) => {
+    state.requests.unshift({
+      id: uid('req'),
+      personIds: entry.personIds,
+      request: entry.text.trim(),
+      urgent: !!entry.urgent,
+      // stagger timestamps by 1ms (earlier for later items) so, under newest-first
+      // sorting, requests typed together still display in the order they were typed
+      dateAdded: new Date(now.getTime() - i).toISOString(),
+      answered: false
+    });
+  });
+  saveState();
+  render();
+}
+
+function startRename(personId) {
+  editingPersonId = personId;
+  statusMsg = '';
+  render();
+  const input = document.getElementById('rename-input-' + personId);
+  if (input) { input.focus(); input.select(); }
+}
+
+function cancelRename() {
+  editingPersonId = null;
+  render();
+}
+
+function saveRename(personId) {
+  const input = document.getElementById('rename-input-' + personId);
+  const name = input.value.trim();
+  if (!name) {
+    statusMsg = 'Name can\u2019t be empty.';
+    render();
+    return;
+  }
+  const person = state.people.find(p => p.id === personId);
+  if (person) person.name = name;
+  editingPersonId = null;
+  statusMsg = '';
+  saveState();
+  render();
+}
+
+function removePerson(personId) {
+  const person = state.people.find(p => p.id === personId);
+  if (!person) return;
+  const involvedCount = state.requests.filter(r => (r.personIds || []).includes(personId)).length;
+  const warning = involvedCount > 0
+    ? `Remove ${person.name}? They're on ${involvedCount} prayer request${involvedCount === 1 ? '' : 's'}. Requests only for them will be deleted; requests shared with others will just no longer include them.`
+    : `Remove ${person.name}?`;
+  if (!confirm(warning)) return;
+
+  state.requests = state.requests
+    .map(r => ({ ...r, personIds: (r.personIds || []).filter(pid => pid !== personId) }))
+    .filter(r => r.personIds.length > 0);
+  state.people = state.people.filter(p => p.id !== personId);
+  saveState();
+  render();
+}
+
+function startEdit(id) {
+  editingId = id;
+  statusMsg = '';
+  render();
+}
+
+function cancelEdit() {
+  editingId = null;
+  render();
+}
+
+function saveEdit(id) {
+  const entry = state.requests.find(r => r.id === id);
+  if (!entry) return;
+  const textEl = document.getElementById('edit-text-' + id);
+  const peopleContainer = document.getElementById('edit-people-' + id);
+  const urgentEl = document.getElementById('edit-urgent-' + id);
+  const text = textEl.value.trim();
+  const personIds = Array.from(peopleContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+
+  if (!text || personIds.length === 0) {
+    statusMsg = 'Please keep some request text and at least one person checked.';
+    render();
+    return;
+  }
+
+  entry.request = text;
+  entry.personIds = personIds;
+  entry.urgent = !!(urgentEl && urgentEl.checked);
+  editingId = null;
+  statusMsg = '';
+  saveState();
+  render();
+}
+
+function markAnswered(id) {
+  const entry = state.requests.find(r => r.id === id);
+  if (!entry) return;
+  entry.answered = true;
+  entry.dateAnswered = new Date().toISOString();
+  saveState();
+  render();
+}
+
+function undoAnswered(id) {
+  const entry = state.requests.find(r => r.id === id);
+  if (!entry) return;
+  entry.answered = false;
+  delete entry.dateAnswered;
+  saveState();
+  render();
+}
+
+function deleteEntry(id) {
+  state.requests = state.requests.filter(r => r.id !== id);
+  saveState();
+  render();
+}
+
+function setMode(next) {
+  mode = next;
+  if (next === 'display') editingId = null;
+  render();
+  restartPolling();
+}
+
+function restartPolling() {
+  if (pollTimer) clearInterval(pollTimer);
+  pollTimer = setInterval(async () => {
+    if (mode !== 'display') return; // don't disturb an in-progress form in manage mode
+    try {
+      const res = await fetch('/api/data');
+      if (res.ok) {
+        const parsed = await res.json();
+        state = { people: parsed.people || [], requests: parsed.requests || [] };
+        render();
+      }
+    } catch (e) { /* ignore */ }
+  }, 4000);
+}
+
+// Group a list of request entries by person, sorted so groups with an urgent
+// request come first, then the most recently active person, and requests
+// within a group show urgent-first, then newest first.
+// A request shared by multiple people appears once under each of them.
+function groupByPerson(list) {
+  const byPerson = {};
+  list.forEach(r => {
+    (r.personIds || []).forEach(pid => {
+      if (!byPerson[pid]) byPerson[pid] = [];
+      byPerson[pid].push(r);
+    });
+  });
+  const groups = Object.keys(byPerson).map(personId => {
+    const entries = byPerson[personId].sort((a, b) => {
+      if (!!b.urgent !== !!a.urgent) return (b.urgent ? 1 : 0) - (a.urgent ? 1 : 0);
+      return new Date(b.dateAdded) - new Date(a.dateAdded);
+    });
+    const hasUrgent = entries.some(e => e.urgent);
+    return { personId, name: personName(personId), entries, hasUrgent, mostRecent: new Date(entries[0].dateAdded) };
+  });
+  groups.sort((a, b) => {
+    if (b.hasUrgent !== a.hasUrgent) return (b.hasUrgent ? 1 : 0) - (a.hasUrgent ? 1 : 0);
+    return b.mostRecent - a.mostRecent;
+  });
+  return groups;
+}
+
+function requestLineHtml(entry, isDisplay, currentPersonId) {
+  if (!isDisplay && editingId === entry.id) {
+    return editFormHtml(entry);
+  }
+  const isAnswered = entry.answered;
+  const dateLabel = formatDate(isAnswered ? entry.dateAnswered : entry.dateAdded);
+  const others = (entry.personIds || []).filter(pid => pid !== currentPersonId).map(personName);
+  const sharedNote = others.length ? `<div class="shared-with">Shared with ${escapeHtml(others.join(', '))}</div>` : '';
+  const urgentBadge = entry.urgent ? `<span class="urgent-badge">Urgent</span>` : '';
+  const actions = isDisplay ? '' : `
+    <div class="request-actions">
+      <button class="edit-btn" onclick="startEdit('${entry.id}')">Edit</button>
+      ${isAnswered
+        ? `<button class="undo-btn" onclick="undoAnswered('${entry.id}')">Move back</button>`
+        : `<button class="answer-btn" onclick="markAnswered('${entry.id}')">Mark answered</button>`
+      }
+      <button class="delete-btn" onclick="deleteEntry('${entry.id}')">Remove</button>
+    </div>`;
+  return `
+    <div class="request-line ${entry.urgent ? 'urgent' : ''}">
+      <div class="request-date">${dateLabel}</div>
+      <div class="request-text">${escapeHtml(entry.request)}${urgentBadge}${sharedNote}</div>
+      ${actions}
+    </div>`;
+}
+
+function editFormHtml(entry) {
+  return `
+    <div class="request-line editing-line">
+      <div class="people-picker-label">Who is this for?</div>
+      <div class="people-checkboxes" id="edit-people-${entry.id}">${renderPeopleCheckboxesHtml(entry.personIds || [])}</div>
+      <textarea class="edit-textarea" id="edit-text-${entry.id}" rows="2">${escapeHtml(entry.request)}</textarea>
+      <label class="urgent-checkbox-row">
+        <input type="checkbox" id="edit-urgent-${entry.id}" ${entry.urgent ? 'checked' : ''}>
+        Mark as urgent
+      </label>
+      <div class="edit-actions">
+        <button class="save-btn" onclick="saveEdit('${entry.id}')">Save changes</button>
+        <button class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+      </div>
+    </div>`;
+}
+
+function personGroupHtml(group, isDisplay) {
+  const flame = group.entries[0].answered ? '✦' : '🕯';
+  return `
+    <div class="person-group">
+      <div class="person-name"><span class="flame">${flame}</span>${escapeHtml(group.name)}</div>
+      ${group.entries.map(e => requestLineHtml(e, isDisplay, group.personId)).join('')}
+    </div>`;
+}
+
+function listSection(title, list, isDisplay, emptyText) {
+  const groups = groupByPerson(list);
+  const body = groups.length
+    ? groups.map(g => personGroupHtml(g, isDisplay)).join('')
+    : `<div class="empty-note">${emptyText}</div>`;
+  return `
+    <div class="section-title">${title} <span class="section-count">(${list.length})</span></div>
+    <div class="section-rule"></div>
+    ${body}`;
+}
+
+function render() {
+  const app = document.getElementById('app');
+  app.className = 'app' + (mode === 'display' ? ' display-mode' : '');
+
+  const activeList = state.requests.filter(r => !r.answered);
+  const answeredList = state.requests.filter(r => r.answered);
+
+  if (mode === 'display') {
+    document.getElementById('content').innerHTML = `
+      <button class="exit-display" onclick="setMode('manage')">Exit display</button>
+      <h1>Sharing Time</h1>
+      <div class="subtitle">Prayer requests</div>
+      ${listSection('Requests', activeList, true, 'No requests right now.')}
+      ${listSection('Answered', answeredList, true, 'None answered yet.')}
+    `;
+    return;
+  }
+
+  document.getElementById('content').innerHTML = `
+    <header class="top">
+      <div>
+        <h1>Sharing Time</h1>
+        <div class="subtitle">Prayer requests</div>
+      </div>
+      <div class="mode-toggle">
+        <button class="active" onclick="setMode('manage')">Manage</button>
+        <button onclick="setMode('display')">Display</button>
+      </div>
+    </header>
+    <div class="status-line">${statusMsg}</div>
+
+    <div class="add-form">
+      <label>Prayer requests</label>
+      <div id="request-lines">
+        ${requestInputRowHtml([])}
+      </div>
+      <button type="button" class="add-request-line" onclick="addRequestField()">+ Add another request</button>
+      <br>
+      <button class="submit" onclick="handleAdd()">Add to list</button>
+    </div>
+
+    <button type="button" class="people-toggle" onclick="togglePeopleManager()">
+      ${showPeopleManager ? 'Hide people list' : 'Edit or remove people…'}
+    </button>
+    ${showPeopleManager ? peopleManagerHtml() : ''}
+
+    ${listSection('Requests', activeList, false, 'Nothing added yet — use the form above.')}
+    ${listSection('Answered', answeredList, false, 'Answered prayers will show up here.')}
+  `;
+}
+
+function togglePeopleManager() {
+  showPeopleManager = !showPeopleManager;
+  render();
+}
+
+function peopleManagerHtml() {
+  const sorted = [...state.people].sort((a, b) => a.name.localeCompare(b.name));
+  if (!sorted.length) {
+    return `<div class="empty-note">No one's been added yet.</div>`;
+  }
+  return `
+    <div class="people-manager-list">
+      ${sorted.map(p => personManageRowHtml(p)).join('')}
+    </div>`;
+}
+
+function personManageRowHtml(p) {
+  if (editingPersonId === p.id) {
+    return `
+      <div class="person-manage-row editing">
+        <input type="text" id="rename-input-${p.id}" value="${escapeHtml(p.name)}">
+        <div class="person-manage-actions">
+          <button class="save-btn" onclick="saveRename('${p.id}')">Save</button>
+          <button class="cancel-btn" onclick="cancelRename()">Cancel</button>
+        </div>
+      </div>`;
+  }
+  return `
+    <div class="person-manage-row">
+      <span class="person-manage-name">${escapeHtml(p.name)}</span>
+      <div class="person-manage-actions">
+        <button class="edit-btn" onclick="startRename('${p.id}')">Rename</button>
+        <button class="delete-btn" onclick="removePerson('${p.id}')">Remove</button>
+      </div>
+    </div>`;
+}
+
+// Renders one request input row: a people-picker (checkboxes + quick-add) plus a textarea.
+// selectedIds pre-checks those people (used when duplicating context from the previous row).
+function renderPeopleCheckboxesHtml(selectedIds) {
+  const sorted = [...state.people].sort((a, b) => a.name.localeCompare(b.name));
+  if (!sorted.length) {
+    return `<div class="empty-note" style="padding:4px 0;">No one added yet — use "Add new person" below.</div>`;
+  }
+  return sorted.map(p => `
+    <label class="person-check ${selectedIds.includes(p.id) ? 'checked' : ''}">
+      <input type="checkbox" value="${p.id}" ${selectedIds.includes(p.id) ? 'checked' : ''} onchange="this.closest('.person-check').classList.toggle('checked', this.checked)">
+      ${escapeHtml(p.name)}
+    </label>`).join('');
+}
+
+function requestInputRowHtml(selectedIds) {
+  return `
+    <div class="request-input-row">
+      <button type="button" class="remove-request-btn" onclick="removeRequestField(this)" title="Remove this request">×</button>
+      <div class="people-picker-label">Who is this for?</div>
+      <div class="people-checkboxes">${renderPeopleCheckboxesHtml(selectedIds)}</div>
+      <div class="quick-add-person">
+        <input type="text" class="quick-person-input" placeholder="Add a new person…">
+        <button type="button" onclick="quickAddPersonForLine(this)">+ Add</button>
+      </div>
+      <textarea class="request-input" rows="2" placeholder="What should we be praying for?"></textarea>
+      <label class="urgent-checkbox-row">
+        <input type="checkbox" class="urgent-input">
+        Mark as urgent
+      </label>
+    </div>`;
+}
+
+function addRequestField() {
+  const container = document.getElementById('request-lines');
+  const rows = container.querySelectorAll('.request-input-row');
+  // Default the new row's people to whatever was checked in the last row,
+  // so continuing requests for the same person/people is a single click.
+  const lastRow = rows[rows.length - 1];
+  const carryIds = lastRow ? getRowCheckedIds(lastRow) : [];
+  const wrapper = document.createElement('div');
+  wrapper.innerHTML = requestInputRowHtml(carryIds);
+  const newRow = wrapper.firstElementChild;
+  container.appendChild(newRow);
+  newRow.querySelector('textarea').focus();
+}
+
+function removeRequestField(btn) {
+  const container = document.getElementById('request-lines');
+  const row = btn.closest('.request-input-row');
+  // keep at least one row so the form is never empty
+  if (container.querySelectorAll('.request-input-row').length > 1) {
+    row.remove();
+  }
+}
+
+function getRowCheckedIds(row) {
+  return Array.from(row.querySelectorAll('.people-checkboxes input[type="checkbox"]:checked')).map(cb => cb.value);
+}
+
+function quickAddPersonForLine(btn) {
+  const row = btn.closest('.request-input-row');
+  const input = row.querySelector('.quick-person-input');
+  const name = input.value.trim();
+  if (!name) return;
+  const checkedBefore = getRowCheckedIds(row);
+  const personId = findOrCreatePerson(name); // adds to state.people in memory
+  input.value = '';
+  // Refresh every row's checkbox list so the new person is selectable everywhere,
+  // pre-checked only in the row where they were just added.
+  document.querySelectorAll('.request-input-row').forEach(r => {
+    const ids = r === row ? [...checkedBefore, personId] : getRowCheckedIds(r);
+    r.querySelector('.people-checkboxes').innerHTML = renderPeopleCheckboxesHtml(ids);
+  });
+}
+
+function handleAdd() {
+  const rows = Array.from(document.querySelectorAll('.request-input-row'));
+  const entries = [];
+  let missingPeople = false;
+
+  rows.forEach(row => {
+    const text = row.querySelector('.request-input').value.trim();
+    if (!text) return; // skip blank rows silently
+    const personIds = getRowCheckedIds(row);
+    if (personIds.length === 0) {
+      missingPeople = true;
+      return;
+    }
+    const urgent = row.querySelector('.urgent-input').checked;
+    entries.push({ personIds, text, urgent });
+  });
+
+  if (missingPeople) {
+    statusMsg = 'Please check who each request is for.';
+    render();
+    return;
+  }
+  if (entries.length === 0) {
+    statusMsg = 'Please enter at least one request and who it\u2019s for.';
+    render();
+    return;
+  }
+
+  statusMsg = '';
+  addRequestsBatch(entries);
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.target && e.target.classList && e.target.classList.contains('request-input') && e.key === 'Enter' && (e.metaKey || e.ctrlKey)) {
+    e.preventDefault();
+    handleAdd();
+  }
+});
+
+loadState();
+restartPolling();
+</script>
+
+</body>
+</html>
