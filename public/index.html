@@ -152,6 +152,76 @@ input:focus, textarea:focus, select:focus {
   flex: 1;
 }
 
+.people-picker-block {
+  margin-bottom: 8px;
+}
+
+.people-search-input {
+  margin-bottom: 6px;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+}
+
+.people-checkboxes.list-format {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 190px;
+  overflow-y: auto;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  padding: 6px;
+  background: var(--ink-2);
+}
+
+.people-checkboxes.list-format .person-check {
+  display: flex;
+  width: 100%;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  padding: 7px 8px;
+}
+
+.people-checkboxes.list-format .person-check:hover {
+  background: rgba(243, 238, 225, 0.06);
+}
+
+.people-checkboxes.list-format .person-check.checked {
+  background: rgba(217, 165, 102, 0.14);
+}
+
+.add-people-block {
+  background: var(--ink);
+  border: 1px solid var(--hairline);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 16px;
+}
+
+.add-people-hint {
+  font-size: 0.75rem;
+  color: var(--parchment-dim);
+  margin-bottom: 8px;
+}
+
+.add-people-block textarea {
+  margin-bottom: 8px;
+}
+
+.add-people-block button {
+  background: var(--gold);
+  color: var(--ink);
+  border: none;
+  padding: 8px 18px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: 'Inter', sans-serif;
+}
+.add-people-block button:hover { filter: brightness(1.08); }
+
 .people-picker-label {
   font-size: 0.72rem;
   color: var(--parchment-dim);
@@ -188,29 +258,6 @@ input:focus, textarea:focus, select:focus {
   color: var(--parchment);
   border-color: var(--gold);
 }
-
-.quick-add-person {
-  display: flex;
-  gap: 6px;
-  margin-bottom: 8px;
-}
-
-.quick-add-person input {
-  font-size: 0.85rem;
-  padding: 6px 10px;
-}
-
-.quick-add-person button {
-  background: transparent;
-  border: 1px solid var(--hairline);
-  color: var(--gold);
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  white-space: nowrap;
-}
-.quick-add-person button:hover { border-color: var(--gold); }
 
 .remove-request-btn {
   position: absolute;
@@ -835,7 +882,10 @@ function editFormHtml(entry) {
   return `
     <div class="request-line editing-line">
       <div class="people-picker-label">Who is this for?</div>
-      <div class="people-checkboxes" id="edit-people-${entry.id}">${renderPeopleCheckboxesHtml(entry.personIds || [])}</div>
+      <div class="people-picker-block">
+        <input type="text" class="people-search-input" placeholder="Search people…" oninput="filterPeopleList(this)">
+        <div class="people-checkboxes list-format" id="edit-people-${entry.id}">${renderPeopleCheckboxesHtml(entry.personIds || [])}</div>
+      </div>
       <textarea class="edit-textarea" id="edit-text-${entry.id}" rows="2">${escapeHtml(entry.request)}</textarea>
       <label class="urgent-checkbox-row">
         <input type="checkbox" id="edit-urgent-${entry.id}" ${entry.urgent ? 'checked' : ''}>
@@ -910,7 +960,7 @@ function render() {
     </div>
 
     <button type="button" class="people-toggle" onclick="togglePeopleManager()">
-      ${showPeopleManager ? 'Hide people list' : 'Edit or remove people…'}
+      ${showPeopleManager ? 'Hide people list' : 'Add, edit, or remove people…'}
     </button>
     ${showPeopleManager ? peopleManagerHtml() : ''}
 
@@ -926,13 +976,30 @@ function togglePeopleManager() {
 
 function peopleManagerHtml() {
   const sorted = [...state.people].sort((a, b) => a.name.localeCompare(b.name));
-  if (!sorted.length) {
-    return `<div class="empty-note">No one's been added yet.</div>`;
-  }
+  const list = sorted.length
+    ? `<div class="people-manager-list">${sorted.map(p => personManageRowHtml(p)).join('')}</div>`
+    : `<div class="empty-note">No one's been added yet — add some below.</div>`;
   return `
-    <div class="people-manager-list">
-      ${sorted.map(p => personManageRowHtml(p)).join('')}
-    </div>`;
+    <div class="add-people-block">
+      <div class="add-people-hint">Add one or more people at once — one name per line:</div>
+      <textarea id="bulk-add-people" rows="3" placeholder="Brittany&#10;Evander&#10;Maria"></textarea>
+      <button type="button" onclick="bulkAddPeople()">Add people</button>
+    </div>
+    ${list}`;
+}
+
+function bulkAddPeople() {
+  const textarea = document.getElementById('bulk-add-people');
+  const names = textarea.value.split('\n').map(n => n.trim()).filter(Boolean);
+  if (!names.length) {
+    statusMsg = 'Type at least one name, one per line.';
+    render();
+    return;
+  }
+  names.forEach(n => findOrCreatePerson(n));
+  statusMsg = `Added ${names.length} ${names.length === 1 ? 'person' : 'people'}.`;
+  saveState();
+  render();
 }
 
 function personManageRowHtml(p) {
@@ -956,18 +1023,28 @@ function personManageRowHtml(p) {
     </div>`;
 }
 
-// Renders one request input row: a people-picker (checkboxes + quick-add) plus a textarea.
+// Renders one request input row: a searchable people-picker plus a textarea.
 // selectedIds pre-checks those people (used when duplicating context from the previous row).
 function renderPeopleCheckboxesHtml(selectedIds) {
   const sorted = [...state.people].sort((a, b) => a.name.localeCompare(b.name));
   if (!sorted.length) {
-    return `<div class="empty-note" style="padding:4px 0;">No one added yet — use "Add new person" below.</div>`;
+    return `<div class="empty-note" style="padding:4px 0;">No one added yet — add people below.</div>`;
   }
   return sorted.map(p => `
-    <label class="person-check ${selectedIds.includes(p.id) ? 'checked' : ''}">
+    <label class="person-check ${selectedIds.includes(p.id) ? 'checked' : ''}" data-name="${escapeHtml(p.name)}">
       <input type="checkbox" value="${p.id}" ${selectedIds.includes(p.id) ? 'checked' : ''} onchange="this.closest('.person-check').classList.toggle('checked', this.checked)">
       ${escapeHtml(p.name)}
     </label>`).join('');
+}
+
+function filterPeopleList(input) {
+  const block = input.closest('.people-picker-block');
+  if (!block) return;
+  const term = input.value.trim().toLowerCase();
+  block.querySelectorAll('.person-check').forEach(label => {
+    const name = (label.dataset.name || '').toLowerCase();
+    label.style.display = !term || name.includes(term) ? '' : 'none';
+  });
 }
 
 function requestInputRowHtml(selectedIds) {
@@ -975,10 +1052,9 @@ function requestInputRowHtml(selectedIds) {
     <div class="request-input-row">
       <button type="button" class="remove-request-btn" onclick="removeRequestField(this)" title="Remove this request">×</button>
       <div class="people-picker-label">Who is this for?</div>
-      <div class="people-checkboxes">${renderPeopleCheckboxesHtml(selectedIds)}</div>
-      <div class="quick-add-person">
-        <input type="text" class="quick-person-input" placeholder="Add a new person…">
-        <button type="button" onclick="quickAddPersonForLine(this)">+ Add</button>
+      <div class="people-picker-block">
+        <input type="text" class="people-search-input" placeholder="Search people…" oninput="filterPeopleList(this)">
+        <div class="people-checkboxes list-format">${renderPeopleCheckboxesHtml(selectedIds)}</div>
       </div>
       <textarea class="request-input" rows="2" placeholder="What should we be praying for?"></textarea>
       <label class="urgent-checkbox-row">
@@ -1013,22 +1089,6 @@ function removeRequestField(btn) {
 
 function getRowCheckedIds(row) {
   return Array.from(row.querySelectorAll('.people-checkboxes input[type="checkbox"]:checked')).map(cb => cb.value);
-}
-
-function quickAddPersonForLine(btn) {
-  const row = btn.closest('.request-input-row');
-  const input = row.querySelector('.quick-person-input');
-  const name = input.value.trim();
-  if (!name) return;
-  const checkedBefore = getRowCheckedIds(row);
-  const personId = findOrCreatePerson(name); // adds to state.people in memory
-  input.value = '';
-  // Refresh every row's checkbox list so the new person is selectable everywhere,
-  // pre-checked only in the row where they were just added.
-  document.querySelectorAll('.request-input-row').forEach(r => {
-    const ids = r === row ? [...checkedBefore, personId] : getRowCheckedIds(r);
-    r.querySelector('.people-checkboxes').innerHTML = renderPeopleCheckboxesHtml(ids);
-  });
 }
 
 function handleAdd() {
