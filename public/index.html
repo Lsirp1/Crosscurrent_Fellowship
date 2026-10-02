@@ -480,7 +480,6 @@ function filterPeopleList(input) {
 function requestInputRowHtml(selectedIds) {
   return `
     <div class="request-input-row">
-      <button type="button" class="remove-request-btn" onclick="removeRequestField(this)" title="Remove this request">×</button>
       <div class="people-picker-label">Who is this for?</div>
       <div class="people-picker-block">
         <input type="text" class="people-search-input" placeholder="Search people…" oninput="filterPeopleList(this)">
@@ -506,15 +505,6 @@ function addRequestField() {
   const newRow = wrapper.firstElementChild;
   container.appendChild(newRow);
   newRow.querySelector('textarea').focus();
-}
-
-function removeRequestField(btn) {
-  const container = document.getElementById('request-lines');
-  const row = btn.closest('.request-input-row');
-  // keep at least one row so the form is never empty
-  if (container.querySelectorAll('.request-input-row').length > 1) {
-    row.remove();
-  }
 }
 
 function getRowCheckedIds(row) {
