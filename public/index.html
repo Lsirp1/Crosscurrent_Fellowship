@@ -354,12 +354,23 @@ function render() {
 
   const activeList = state.requests.filter(r => !r.answered);
   const answeredList = state.requests.filter(r => r.answered);
+  const isDisplay = mode === 'display';
 
-  if (mode === 'display') {
+  const header = `
+    <header class="top">
+      <div>
+        <h1>Sharing Time</h1>
+        <div class="subtitle">Prayer requests</div>
+      </div>
+      <div class="mode-toggle">
+        <button class="${isDisplay ? '' : 'active'}" onclick="setMode('manage')">Manage</button>
+        <button class="${isDisplay ? 'active' : ''}" onclick="setMode('display')">Display</button>
+      </div>
+    </header>`;
+
+  if (isDisplay) {
     document.getElementById('content').innerHTML = `
-      <button class="exit-display" onclick="setMode('manage')">Exit display</button>
-      <h1>Sharing Time</h1>
-      <div class="subtitle">Prayer requests</div>
+      ${header}
       ${listSection('Requests', activeList, true, 'No requests right now.')}
       ${listSection('Answered', answeredList, true, 'None answered yet.')}
     `;
@@ -367,16 +378,7 @@ function render() {
   }
 
   document.getElementById('content').innerHTML = `
-    <header class="top">
-      <div>
-        <h1>Sharing Time</h1>
-        <div class="subtitle">Prayer requests</div>
-      </div>
-      <div class="mode-toggle">
-        <button class="active" onclick="setMode('manage')">Manage</button>
-        <button onclick="setMode('display')">Display</button>
-      </div>
-    </header>
+    ${header}
     <div class="status-line">${statusMsg}</div>
 
     <div class="add-form">
