@@ -216,7 +216,7 @@ input:focus, textarea:focus, select:focus {
   padding: 7px 10px;
   font-family: 'Fraunces', serif;
   font-size: 1rem;
-  color: var(--parchment-dim);
+  color: #ffffff;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -242,7 +242,7 @@ input:focus, textarea:focus, select:focus {
 /* selected: the row gets darker */
 .people-checkboxes.list-format .person-check.checked {
   background: rgba(6, 10, 22, 0.6);
-  color: var(--parchment);
+  color: #ffffff;
 }
 
 .add-people-block {
