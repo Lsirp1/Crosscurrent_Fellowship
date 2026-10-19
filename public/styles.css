@@ -398,15 +398,37 @@ input:focus, textarea:focus, select:focus {
 }
 .people-toggle:hover { color: var(--parchment); }
 
-.people-manager-list { margin-bottom: 12px; }
+.people-manager-list {
+  max-height: 260px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: var(--ink-2);
+  margin-bottom: 12px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hairline) var(--ink-2);
+}
+
+.people-manager-list::-webkit-scrollbar { width: 8px; }
+.people-manager-list::-webkit-scrollbar-track {
+  background: var(--ink-2);
+  border-radius: 6px;
+}
+.people-manager-list::-webkit-scrollbar-thumb {
+  background: var(--hairline);
+  border-radius: 6px;
+}
+.people-manager-list::-webkit-scrollbar-thumb:hover { background: var(--gold); }
 
 .person-manage-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--hairline);
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(217, 165, 102, 0.18);
 }
 .person-manage-row:last-child { border-bottom: none; }
 
